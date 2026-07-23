@@ -5,66 +5,14 @@
   },
   "sections": [
     {
-      "label": "Start here",
+      "label": "Specs",
       "docs": [
         {
-          "id": "getting-started",
-          "title": "Getting started",
-          "file": "getting-started.md",
+          "id": "compose-new-spec",
+          "title": "EasyMemo — Compose New spec",
+          "file": "compose-new-spec.md",
           "updated": "2026-07-23",
-          "summary": "Run Folio locally and find your way around."
-        },
-        {
-          "id": "how-it-works",
-          "title": "How Folio works",
-          "file": "how-it-works.md",
-          "updated": "2026-07-23",
-          "summary": "The four files that make up the whole site."
-        }
-      ]
-    },
-    {
-      "label": "Guides",
-      "docs": [
-        {
-          "id": "adding-documents",
-          "title": "Adding a document",
-          "file": "adding-documents.md",
-          "updated": "2026-07-23",
-          "summary": "Write Markdown, add one entry to the manifest."
-        },
-        {
-          "id": "deploy-github-pages",
-          "title": "Deploying to GitHub Pages",
-          "file": "deploy-github-pages.md",
-          "updated": "2026-07-23",
-          "summary": "Put the site online for free, in about five minutes."
-        },
-        {
-          "id": "making-it-yours",
-          "title": "Making it yours",
-          "file": "making-it-yours.md",
-          "updated": "2026-07-23",
-          "summary": "Colours, type, name, favicon."
-        }
-      ]
-    },
-    {
-      "label": "Reference",
-      "docs": [
-        {
-          "id": "markdown-reference",
-          "title": "Markdown reference",
-          "file": "markdown-reference.md",
-          "updated": "2026-07-23",
-          "summary": "Every element Folio knows how to render."
-        },
-        {
-          "id": "changelog",
-          "title": "Changelog",
-          "file": "changelog.md",
-          "updated": "2026-07-23",
-          "summary": "What changed, and when."
+          "summary": "Endpoint-by-endpoint implementation spec for the EasyMemo Compose New feature on mobile."
         }
       ]
     }
