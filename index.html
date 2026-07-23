@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Folio — Documentation</title>
+<meta name="description" content="A one-page documentation site. Read any document in the browser or take it with you as a PDF.">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23134E3F'/%3E%3Cpath d='M11 9h11M11 15h11M11 21h7' stroke='%23E9EBE6' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400..700&display=swap">
+<link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#doc">Skip to document</a>
+
+<div class="shell">
+
+  <!-- ─────────── Sidebar: the index ─────────── -->
+  <aside class="index" id="index" aria-label="Document index">
+    <div class="index__inner">
+
+      <a class="mark" href="#/">
+        <span class="mark__glyph" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="30" height="30"><rect width="32" height="32" rx="7"/><path d="M11 9h11M11 15h11M11 21h7" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>
+        </span>
+        <span class="mark__text">
+          <span class="mark__name">Folio</span>
+          <span class="mark__sub">Documentation</span>
+        </span>
+      </a>
+
+      <div class="filter">
+        <svg class="filter__icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke-width="1.6"/><path d="M10.4 10.4 14 14" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input id="filter" type="search" placeholder="Filter documents" aria-label="Filter documents" autocomplete="off" spellcheck="false">
+        <kbd>/</kbd>
+      </div>
+
+      <nav class="list" id="list" aria-label="Documents"></nav>
+
+      <p class="list__empty" id="listEmpty" hidden>No document matches that.</p>
+
+      <footer class="index__foot">
+        <button class="ghost" id="theme" type="button" aria-live="polite">
+          <span class="ghost__ico" aria-hidden="true">◐</span><span id="themeLabel">Dark</span>
+        </button>
+        <span class="index__count" id="count"></span>
+      </footer>
+    </div>
+  </aside>
+
+  <!-- ─────────── Reading column ─────────── -->
+  <main class="page">
+
+    <div class="topbar">
+      <button class="iconbtn topbar__menu" id="menu" type="button" aria-expanded="false" aria-controls="index">
+        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="sr">Documents</span>
+      </button>
+      <span class="topbar__here" id="topbarHere">Folio</span>
+    </div>
+
+    <article class="doc" id="doc" tabindex="-1">
+
+      <header class="doc__head" id="docHead" hidden>
+        <p class="doc__folio"><span id="folioNo">f. 01</span><span class="dot"></span><span id="docSection">Start here</span></p>
+        <h1 class="doc__title" id="docTitle">—</h1>
+        <p class="doc__meta"><span id="docUpdated"></span><span class="dot"></span><span id="docRead"></span></p>
+
+        <div class="doc__acts">
+          <button class="btn btn--go" id="pdf" type="button">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8.5M4.6 7.4 8 10.8l3.4-3.4M2.6 13.4h10.8" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="pdfLabel">Download PDF</span>
+          </button>
+          <button class="btn" id="print" type="button">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 6V2.6h7V6M4.5 11H3.2V6.6h9.6V11h-1.3M4.5 9.6h7v3.8h-7z" fill="none" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Print
+          </button>
+          <button class="btn btn--quiet" id="copy" type="button">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.6 9.4a2.6 2.6 0 0 0 3.9.3l2-2a2.6 2.6 0 0 0-3.7-3.7l-1.1 1.1M9.4 6.6a2.6 2.6 0 0 0-3.9-.3l-2 2a2.6 2.6 0 0 0 3.7 3.7l1.1-1.1" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span id="copyLabel">Copy link</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="prose" id="prose">
+        <div class="boot" id="boot">
+          <p class="boot__eyebrow">Folio</p>
+          <h2 class="boot__title">Pick a document from the index.</h2>
+          <p class="boot__body">Everything here is a plain Markdown file in <code>docs/</code>. Read it in the browser, or take it with you as a PDF.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- On-page contents -->
+    <nav class="toc" id="toc" aria-label="On this page" hidden>
+      <p class="toc__label">On this page</p>
+      <ul id="tocList"></ul>
+    </nav>
+
+  </main>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Off-screen node used to render the PDF -->
+<div id="pdfStage" aria-hidden="true"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.11/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="./assets/app.js"></script>
+</body>
+</html>
