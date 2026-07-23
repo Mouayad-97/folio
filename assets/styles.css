@@ -272,8 +272,9 @@ svg { stroke: currentColor; }
 }
 .index__by {
   margin: 0; padding-left: 8px;
-  font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
-  letter-spacing: .04em;
+  font-family: var(--mono); font-size: 8px; line-height: 1.4;
+  color: var(--ink-3); opacity: .75;
+  letter-spacing: .03em;
 }
 
 .ghost {
