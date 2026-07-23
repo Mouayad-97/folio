@@ -372,18 +372,23 @@
 
   on(el.print, "click", function () { window.print(); });
 
-  on(el.pdf, "click", function () {
-    if (!current) return;
+  /* ── PDF ──────────────────────────────────────────────────── */
 
-    if (!window.html2pdf) {
-      toast("PDF library unavailable — opening print instead");
-      window.print();
-      return;
-    }
+  /* Long documents cannot be photographed in one go: a canvas taller than
+     about 65,000 device pixels comes back blank in every browser, and the
+     ceiling is far lower on phones. So the sheet is captured in bands, and
+     each band is cut into A4 pages. Everything below is in CSS pixels of
+     the off-screen sheet unless the name says otherwise. */
 
-    el.pdf.disabled = true;
-    text(el.pdfLabel, "Preparing PDF…");
+  var PDF = {
+    scale: 1.8,             // capture density — ~215 dpi on A4, and every page is an image,
+    quality: 0.85,          // so both of these are really file-size dials
+    band: 12000,            // max device px per html2canvas call
+    page: { w: 210, h: 297 },                 // A4, mm
+    margin: { top: 16, right: 15, bottom: 18, left: 15 }
+  };
 
+  function buildSheet() {
     var sheet = document.createElement("div");
     sheet.className = "sheet";
     sheet.innerHTML =
@@ -394,17 +399,134 @@
       '</header>' +
       el.prose.innerHTML;
     sheet.querySelector(".sheet__title").textContent = current.title;
+    return sheet;
+  }
+
+  /* Page boundaries that try not to cut through a block. Walks the sheet for
+     elements that fit inside one page and treats their top edge as a legal
+     break; anything taller than a page (a long table, a long pre) is cut. */
+  function pageBreaks(sheet, pageHeight) {
+    var top = sheet.getBoundingClientRect().top;
+    var edges = [];
+
+    (function walk(node) {
+      Array.prototype.forEach.call(node.children, function (child) {
+        var box = child.getBoundingClientRect();
+        var start = box.top - top;
+        if (box.height <= pageHeight) { edges.push(start); return; }
+        edges.push(start);
+        walk(child);           // too tall to keep whole — look for breaks inside it
+      });
+    })(sheet);
+
+    edges.sort(function (a, b) { return a - b; });
+
+    var total = sheet.scrollHeight;
+    var pages = [];
+    var at = 0;
+
+    while (at < total - 1) {
+      var limit = at + pageHeight;
+      if (limit >= total) { pages.push({ start: at, height: total - at }); break; }
+
+      var best = 0;
+      for (var i = 0; i < edges.length; i++) {
+        if (edges[i] > at + pageHeight * 0.25 && edges[i] <= limit) best = edges[i];
+      }
+      var end = best || limit;      // no usable edge — hard cut
+      pages.push({ start: at, height: end - at });
+      at = end;
+    }
+    return pages;
+  }
+
+  function capture(sheet, startCss, heightCss, widthCss, totalCss) {
+    return html2canvas(sheet, {
+      backgroundColor: "#FFFFFF",
+      scale: PDF.scale,
+      useCORS: true,
+      logging: false,
+      x: 0, y: startCss,
+      width: widthCss, height: heightCss,
+      windowWidth: widthCss, windowHeight: totalCss
+    });
+  }
+
+  function sliceOf(band, offsetPx, heightPx) {
+    var slice = document.createElement("canvas");
+    slice.width = band.width;
+    slice.height = Math.max(1, Math.round(heightPx));
+    var ctx = slice.getContext("2d");
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, slice.width, slice.height);
+    ctx.drawImage(band, 0, Math.round(offsetPx), band.width, slice.height,
+                        0, 0, slice.width, slice.height);
+    return slice;
+  }
+
+  function buildPdf(sheet) {
+    var JsPdf = window.jspdf.jsPDF;
+    var pdf = new JsPdf({ unit: "mm", format: "a4", orientation: "portrait" });
+
+    var innerW = PDF.page.w - PDF.margin.left - PDF.margin.right;
+    var innerH = PDF.page.h - PDF.margin.top - PDF.margin.bottom;
+
+    var widthCss = Math.max(sheet.scrollWidth, sheet.offsetWidth);
+    var totalCss = sheet.scrollHeight;
+    var mmPerCss = innerW / widthCss;
+    var pageCss = innerH / mmPerCss;
+
+    var pages = pageBreaks(sheet, pageCss);
+    var bandCss = Math.max(pageCss, Math.floor(PDF.band / PDF.scale));
+    var done = Promise.resolve();
+    var placed = 0;
+
+    // Group pages into bands, so one capture covers several pages.
+    var bands = [];
+    pages.forEach(function (p) {
+      var last = bands[bands.length - 1];
+      if (last && (p.start + p.height) - last.start <= bandCss) last.pages.push(p);
+      else bands.push({ start: p.start, pages: [p] });
+    });
+
+    bands.forEach(function (band) {
+      done = done.then(function () {
+        var last = band.pages[band.pages.length - 1];
+        var heightCss = Math.min(last.start + last.height, totalCss) - band.start;
+        text(el.pdfLabel, "Preparing PDF… " + Math.round(placed / pages.length * 100) + "%");
+
+        return capture(sheet, band.start, heightCss, widthCss, totalCss).then(function (canvas) {
+          band.pages.forEach(function (p) {
+            var slice = sliceOf(canvas, (p.start - band.start) * PDF.scale, p.height * PDF.scale);
+            if (placed) pdf.addPage();
+            pdf.addImage(slice.toDataURL("image/jpeg", PDF.quality), "JPEG",
+              PDF.margin.left, PDF.margin.top, innerW, p.height * mmPerCss);
+            placed += 1;
+          });
+        });
+      });
+    });
+
+    return done.then(function () { pdf.save(current.id + ".pdf"); return pages.length; });
+  }
+
+  on(el.pdf, "click", function () {
+    if (!current) return;
+
+    if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
+      toast("PDF library unavailable — opening print instead");
+      window.print();
+      return;
+    }
+
+    el.pdf.disabled = true;
+    text(el.pdfLabel, "Preparing PDF…");
+
+    var sheet = buildSheet();
     el.stage.appendChild(sheet);
 
-    html2pdf().set({
-      margin: [16, 15, 18, 15],
-      filename: current.id + ".pdf",
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#FFFFFF", logging: false },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["css", "legacy"], avoid: ["pre", "table", "blockquote", "img", "h2", "h3"] }
-    }).from(sheet).save()
-      .then(function () { toast("Downloaded " + current.id + ".pdf"); })
+    buildPdf(sheet)
+      .then(function (count) { toast("Downloaded " + current.id + ".pdf — " + count + " pages"); })
       .catch(function (err) {
         if (window.console) console.error(err);
         toast("Could not build the PDF — opening print instead");
