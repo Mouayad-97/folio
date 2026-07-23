@@ -42,10 +42,20 @@ Write `docs/<name>.md` starting at heading level two (`##`) — `h1` is rendered
 
 `summary` is only used by the filter box (which matches title + summary + section label). `updated` must be `YYYY-MM-DD`. Only `h2`/`h3` reach the on-page contents; deeper headings are ignored.
 
-Note: the README's "Add a document" snippet shows a flat manifest entry — the actual schema is `site` + `sections[]`, each with `label` and `docs[]`.
+Markdown sourced from elsewhere usually needs two edits before it lands in `docs/`: drop the `h1`, and rewrite in-page links from GitHub's `#anchor` form to `#/<doc-id>#<anchor>` — a bare `#anchor` is parsed by the router as a document id and bounces the reader to the home panel. Note also that Folio's slugger collapses repeated hyphens where GitHub keeps them (`#1-a--b` → `1-a-b`).
 
 ## Styling
 
 All colour and layout tokens are CSS custom properties at the top of [assets/styles.css](assets/styles.css): `:root` for light, `[data-theme="dark"]` for dark. Theme is set on `<html data-theme>` by `setTheme()`, persisted in `localStorage` under `folio:theme`, defaulting to `prefers-color-scheme`. Restyling should mean editing variables, not rules. Dark-mode overrides must be added to the `[data-theme="dark"]` block — there is no `prefers-color-scheme` media query driving colours at rule level.
 
 The stylesheet is organised by the `/* ─── section ─── */` banner comments (shell, index, page, prose, on this page, toast, code tokens, responsive, PDF render stage, print). Add rules to the matching section. Sidebar collapses to a drawer at the `860px` breakpoint.
+
+## PDF export
+
+Every PDF page is a JPEG of the off-screen `.sheet`. Captures are banded (max `PDF.band` device px per `html2canvas` call) and cut into A4 pages at block boundaries by `pageBreaks()`. **Do not "simplify" this back into a single capture** — a canvas taller than ~65,535 device px comes back blank, which is exactly what a long document produces. `PDF.scale` and `PDF.quality` are the file-size dials.
+
+## Commits
+
+Conventional Commits, always: `type(scope): subject` — `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `chore`. Subject in the imperative, lowercase, no trailing period. Scope is optional and matches the area touched (`pdf`, `docs`, `ui`, `scripts`).
+
+**Never add a `Co-Authored-By` trailer** (or any other AI attribution) to a commit message.
