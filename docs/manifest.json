@@ -13,6 +13,13 @@
           "file": "compose-new-spec.md",
           "updated": "2026-07-23",
           "summary": "Endpoint-by-endpoint implementation spec for the EasyMemo Compose New feature on mobile."
+        },
+        {
+          "id": "work-item-details-actions",
+          "title": "Work item details — actions & endpoints",
+          "file": "work-item-details-actions.md",
+          "updated": "2026-07-23",
+          "summary": "Every action on the work item details card: when it shows, what it calls, what it sends."
         }
       ]
     }
