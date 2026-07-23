@@ -84,4 +84,4 @@ Order in the manifest is order in the sidebar, and the folio numbers follow it.
 
 ## Licence
 
-MIT.
+MIT — see [LICENSE](LICENSE). Created by Mouayad Aloula.

@@ -256,13 +256,22 @@ svg { stroke: currentColor; }
 }
 
 .index__foot {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 10px;
+  display: flex; flex-direction: column;
+  gap: 2px;
   border-top: 1px solid var(--rule-soft);
   padding: 10px 4px 12px 0;
   flex: none;
 }
+.index__row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+}
 .index__count {
+  font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
+  letter-spacing: .04em;
+}
+.index__by {
+  margin: 0; padding-left: 8px;
   font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
   letter-spacing: .04em;
 }
