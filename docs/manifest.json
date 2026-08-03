@@ -20,6 +20,13 @@
           "file": "work-item-details-actions.md",
           "updated": "2026-07-23",
           "summary": "Every action on the work item details card: when it shows, what it calls, what it sends."
+        },
+        {
+          "id": "annotation-watermark-spec",
+          "title": "EasyMemo — Annotations & watermark spec",
+          "file": "annotation-watermark-spec.md",
+          "updated": "2026-08-03",
+          "summary": "Document viewer annotation and watermark behaviour for mobile: sticky notes, highlights, the identity watermark, and the AnnotationController endpoints."
         }
       ]
     }
