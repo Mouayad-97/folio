@@ -86,6 +86,7 @@
 
   on(el.theme, "click", function () {
     setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+    renderFiguresIn(el.prose, mermaidTheme());   // repaint any diagrams for the new theme
   });
 
   /* ── drawer (mobile) ──────────────────────────────────────── */
@@ -200,9 +201,76 @@
   function highlightAll() {
     if (!window.hljs) return;
     Array.prototype.forEach.call(el.prose.querySelectorAll("pre code"), function (block) {
+      if (/\blanguage-mermaid\b/.test(block.className)) return;  // a diagram, not code — see renderMermaid
       block.removeAttribute("data-highlighted");
       try { hljs.highlightElement(block); } catch (e) { /* unknown language */ }
     });
+  }
+
+  /* ── mermaid diagrams ─────────────────────────────────────── */
+
+  // ```mermaid fences render as code by default; turn them into SVG. The raw
+  // source is kept on data-src so the figure can be re-rendered when the theme
+  // flips (on screen) or forced light (for the PDF).
+  var mmSeq = 0;
+
+  function mermaidTheme() {
+    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "neutral";
+  }
+
+  function mermaidInit(theme) {
+    if (!window.mermaid) return false;
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: theme,
+      securityLevel: "strict",
+      flowchart: { htmlLabels: false, useMaxWidth: true },   // SVG <text> labels survive html2canvas
+      sequence: { useMaxWidth: true }
+    });
+    return true;
+  }
+
+  function drawFigure(fig, theme) {
+    var src = fig.getAttribute("data-src");
+    if (!src) return Promise.resolve();
+    mmSeq += 1;
+    return mermaid.render("mmd-" + mmSeq, src)
+      .then(function (out) { fig.innerHTML = out.svg; })
+      .catch(function (err) {
+        fig.className = "mermaid-figure mermaid-failed";
+        var pre = document.createElement("pre");
+        pre.textContent = src;
+        fig.innerHTML = "";
+        fig.appendChild(pre);
+        if (window.console) console.error("mermaid render failed", err);
+      });
+  }
+
+  // Replace each mermaid <pre><code> with a figure, then draw it.
+  function renderMermaid() {
+    if (!mermaidInit(mermaidTheme())) return;
+    Array.prototype.forEach.call(el.prose.querySelectorAll("pre code"), function (code) {
+      if (!/\blanguage-mermaid\b/.test(code.className)) return;
+      var pre = code.parentNode;
+      var fig = document.createElement("div");
+      fig.className = "mermaid-figure";
+      fig.setAttribute("data-src", code.textContent);
+      pre.parentNode.replaceChild(fig, pre);
+      drawFigure(fig, mermaidTheme());
+    });
+  }
+
+  // Re-draw every figure inside root in the given mermaid theme, in sequence.
+  function renderFiguresIn(root, theme) {
+    if (!window.mermaid || !root) return Promise.resolve();
+    var figs = root.querySelectorAll(".mermaid-figure[data-src]");
+    if (!figs.length) return Promise.resolve();
+    mermaidInit(theme);
+    var chain = Promise.resolve();
+    Array.prototype.forEach.call(figs, function (fig) {
+      chain = chain.then(function () { return drawFigure(fig, theme); });
+    });
+    return chain;
   }
 
   function decorateHeadings() {
@@ -297,6 +365,7 @@
 
       el.prose.innerHTML = renderMarkdown(md);
       highlightAll();
+      renderMermaid();
       buildToc(decorateHeadings());
 
       var hash = location.hash.split("#")[2];
@@ -525,7 +594,10 @@
     var sheet = buildSheet();
     el.stage.appendChild(sheet);
 
-    buildPdf(sheet)
+    // The sheet inherits whatever theme the diagrams were drawn in on screen;
+    // the PDF is always light, so repaint them neutral before capture.
+    renderFiguresIn(sheet, "neutral")
+      .then(function () { return buildPdf(sheet); })
       .then(function (count) { toast("Downloaded " + current.id + ".pdf — " + count + " pages"); })
       .catch(function (err) {
         if (window.console) console.error(err);

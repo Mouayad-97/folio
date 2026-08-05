@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Folio is a static, single-page documentation site: `index.html` + `assets/styles.css` + `assets/app.js` + a folder of Markdown in `docs/`. There is no build step, no package manager, no test suite, and no dependencies to install. Libraries (marked, DOMPurify, highlight.js, html2pdf.js) are loaded from a CDN via `<script>` tags in [index.html](index.html) — there is no bundler, so anything they expose is read off `window`.
+Folio is a static, single-page documentation site: `index.html` + `assets/styles.css` + `assets/app.js` + a folder of Markdown in `docs/`. There is no build step, no package manager, no test suite, and no dependencies to install. Libraries (marked, DOMPurify, highlight.js, mermaid, html2canvas, jsPDF) are loaded from a CDN via `<script>` tags in [index.html](index.html) — there is no bundler, so anything they expose is read off `window`.
 
 ## Running it
 
@@ -22,7 +22,9 @@ Everything runs inside one IIFE in [assets/app.js](assets/app.js). Flow:
 
 1. On load, fetch `docs/manifest.json` → `buildIndex()` walks `sections[].docs[]`, assigns each doc a sequential folio number (`f.01`, `f.02`, …) **in manifest order across all sections**, defaults `id` from the title slug, and populates the `docs` array + `byId` map. Reordering the manifest renumbers the folios.
 2. `route()` reads `location.hash` of the form `#/<doc-id>#<heading-anchor>`. Note the **double** `#`: the doc id and the in-page anchor are both in the hash, split on `#`. Empty id → home panel. Same doc id as `current` → treated as a heading jump, not a reload.
-3. `load()` fetches `docs/<file>`, renders through `marked` → `DOMPurify.sanitize()` (never bypass the sanitizer), then `highlightAll()`, then `decorateHeadings()` (assigns de-duplicated slug ids to `h2`/`h3` and appends `#` anchor links) → `buildToc()` (skipped if fewer than 2 headings; wires an IntersectionObserver scrollspy). Rendered Markdown is cached per doc id in `cache` for the session.
+3. `load()` fetches `docs/<file>`, renders through `marked` → `DOMPurify.sanitize()` (never bypass the sanitizer), then `highlightAll()`, `renderMermaid()`, `decorateHeadings()` (assigns de-duplicated slug ids to `h2`/`h3` and appends `#` anchor links) → `buildToc()` (skipped if fewer than 2 headings; wires an IntersectionObserver scrollspy). Rendered Markdown is cached per doc id in `cache` for the session.
+
+   ` ```mermaid ` fences would otherwise render as code; `renderMermaid()` replaces each with an SVG figure and keeps the raw source on `data-src`, so figures can be repainted when the theme flips (`renderFiguresIn`) — `highlightAll()` skips these blocks. Diagrams are drawn `neutral` (light) / `dark` to match the theme; the PDF forces `neutral` into the off-screen sheet before capture so diagrams never come out dark-on-white. `flowchart.htmlLabels` is off so labels are SVG `<text>`, which html2canvas rasterises reliably (foreignObject does not).
 4. PDF export clones the rendered `.prose` HTML into an off-screen `#pdfStage` wrapped in a `.sheet` node with its own header, runs html2pdf over it, and removes it. `.sheet` styling lives in the "PDF render stage" section of the stylesheet and is what actually controls PDF appearance — the on-screen prose styles do not apply.
 
 Every DOM lookup goes through `$()` and every listener through `on()`/`text()`, which no-op on missing nodes. This is deliberate: buttons in the topbar/doc header can be deleted from `index.html` without breaking the rest of the page. Keep new chrome optional the same way.

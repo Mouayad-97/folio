@@ -15,7 +15,7 @@ No build step, no dependencies to install, no framework. It is one HTML file, on
 - **On-page contents** that highlights the section you are reading.
 - **Light and dark**, following your system by default and remembered after that.
 - **PDF and print.** Both keep the reading layout and drop the site chrome.
-- **Syntax highlighting**, tables, callouts — the usual Markdown, styled to match.
+- **Syntax highlighting**, tables, callouts, and **Mermaid diagrams** (```` ```mermaid ```` fences) — the usual Markdown, styled to match and theme-aware.
 
 ## Run it locally
 
@@ -124,7 +124,7 @@ That means a long document makes a large file (roughly 300 KB per page). **Print
 
 ## Built with
 
-[marked](https://github.com/markedjs/marked) · [DOMPurify](https://github.com/cure53/DOMPurify) · [highlight.js](https://highlightjs.org) · [html2canvas](https://html2canvas.hertzen.com) · [jsPDF](https://github.com/parallax/jsPDF) — all loaded from a CDN, along with the fonts. Vendor them into `assets/vendor/` if you need the site to work offline.
+[marked](https://github.com/markedjs/marked) · [DOMPurify](https://github.com/cure53/DOMPurify) · [highlight.js](https://highlightjs.org) · [mermaid](https://mermaid.js.org) · [html2canvas](https://html2canvas.hertzen.com) · [jsPDF](https://github.com/parallax/jsPDF) — all loaded from a CDN, along with the fonts. Vendor them into `assets/vendor/` if you need the site to work offline.
 
 ## Licence
 

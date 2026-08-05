@@ -476,6 +476,14 @@ svg { stroke: currentColor; }
   word-break: normal;
 }
 
+.prose .mermaid-figure {
+  margin: 0 0 24px;
+  text-align: center;
+  overflow-x: auto;
+}
+.prose .mermaid-figure svg { max-width: 100%; height: auto; }
+.prose .mermaid-failed pre { text-align: left; }
+
 .prose table {
   width: 100%;
   border-collapse: collapse;
@@ -742,6 +750,8 @@ svg { stroke: currentColor; }
 .sheet td { border-bottom: 1px solid #DCE1DA; padding: 7px 10px 7px 0; vertical-align: top; }
 .sheet hr { border: 0; border-top: 1px solid #CFD5CE; margin: 22px 0; }
 .sheet img { max-width: 100%; break-inside: avoid; }
+.sheet .mermaid-figure { text-align: center; margin: 0 0 16px; break-inside: avoid; page-break-inside: avoid; }
+.sheet .mermaid-figure svg { max-width: 100%; height: auto; }
 .sheet .anchor { display: none; }
 .sheet kbd {
   font-family: var(--mono); font-size: 11px; color: #5B6B66;
